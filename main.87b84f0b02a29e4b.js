@@ -16760,7 +16760,8 @@
             (this.Refresh = new he()),
             (this.expence = new vu()),
             (this.errorMSG = ""),
-            (this.roles = []);
+            (this.roles = []),
+            (this.loading = !1);
         }
         ngOnInit() {
           this.roles = this._loginService.haveAccess().UserInfo.roles;
@@ -16769,21 +16770,26 @@
           this.Refresh.emit();
         }
         onSubmit(e) {
-          this._expencesService
-            .editExpence(this.expence._id, this.expence)
-            .subscribe({
-              next: () => {
-                this.sendRefreshReq(), e.reset(), this.closeModal();
-              },
-              error: (t) => {
-                401 === t.status && (this.errorMSG = "Unauthorized"),
-                  403 === t.status && (this.errorMSG = "Forbiden"),
-                  404 === t.status && (this.errorMSG = "Expence Not Found"),
-                  setTimeout(() => {
-                    this.errorMSG = "";
-                  }, 2e3);
-              },
-            });
+          (this.loading = !0),
+            this._expencesService
+              .editExpence(this.expence._id, this.expence)
+              .subscribe({
+                next: () => {
+                  this.sendRefreshReq(),
+                    e.reset(),
+                    this.closeModal(),
+                    (this.loading = !1);
+                },
+                error: (t) => {
+                  (this.loading = !1),
+                    401 === t.status && (this.errorMSG = "Unauthorized"),
+                    403 === t.status && (this.errorMSG = "Forbiden"),
+                    404 === t.status && (this.errorMSG = "Expence Not Found"),
+                    setTimeout(() => {
+                      this.errorMSG = "";
+                    }, 2e3);
+                },
+              });
         }
         closeModal() {
           let e = document.getElementById("edit-Expence-close"),
@@ -17189,7 +17195,7 @@
                 y(2),
                 de(t.errorMSG),
                 y(1),
-                v("disabled", r.form.invalid);
+                v("disabled", r.form.invalid || !0 === t.loading);
             }
           },
           dependencies: [$e, zn, on, Pr, jt, Gn, an, Tn, di, kr, Rt, yo, sn],
@@ -17809,28 +17815,32 @@
             (this.router = t),
             (this.username = ""),
             (this.password = ""),
-            (this.errorMSG = "");
+            (this.errorMSG = ""),
+            (this.loading = !1);
         }
         onSubmit() {
-          this._loginService
-            .login(this.username.toLocaleLowerCase(), this.password)
-            .subscribe({
-              next: (e) => {
-                this._loginService.setIsRefreshToken(!1),
-                  this._loginService.setDATA(e),
-                  sessionStorage.setItem("Token", e.accessToken),
-                  (this.username = ""),
-                  (this.password = ""),
-                  this.router.navigate(["/reservations"]);
-              },
-              error: (e) => {
-                401 === e.status &&
-                  ((this.errorMSG = "username or password are incorrect"),
-                  setTimeout(() => {
-                    this.errorMSG = "";
-                  }, 3e3));
-              },
-            });
+          (this.loading = !0),
+            this._loginService
+              .login(this.username.toLocaleLowerCase(), this.password)
+              .subscribe({
+                next: (e) => {
+                  (this.loading = !1),
+                    this._loginService.setIsRefreshToken(!1),
+                    this._loginService.setDATA(e),
+                    sessionStorage.setItem("Token", e.accessToken),
+                    (this.username = ""),
+                    (this.password = ""),
+                    this.router.navigate(["/reservations"]);
+                },
+                error: (e) => {
+                  (this.loading = !1),
+                    401 === e.status &&
+                      ((this.errorMSG = "username or password are incorrect"),
+                      setTimeout(() => {
+                        this.errorMSG = "";
+                      }, 3e3));
+                },
+              });
         }
       }
       (Js.ɵfac = function (e) {
@@ -17960,7 +17970,7 @@
                 y(4),
                 v("ngIf", o.invalid && o.touched),
                 y(1),
-                v("disabled", r.form.invalid),
+                v("disabled", r.form.invalid || !0 === t.loading),
                 y(3),
                 de(t.errorMSG);
             }
@@ -18781,6 +18791,7 @@
             (this.date = ""),
             (this.bnumb = 0),
             (this.sendRefresh = new he()),
+            (this.loading = !1),
             (this.errorMSG = ""),
             (this.reservation = new Co());
         }
@@ -18795,7 +18806,8 @@
           this.sendRefresh.emit();
         }
         onSubmit(e) {
-          (this.reservation.bookedDate = this.date),
+          (this.loading = !0),
+            (this.reservation.bookedDate = this.date),
             (this.reservation.number = this.bnumb),
             this._reservationService
               .addNewReservation(this.reservation)
@@ -18804,10 +18816,12 @@
                   e.reset(),
                     (this.reservation = new Co()),
                     this.refreshReservations(),
-                    this.closeModal();
+                    this.closeModal(),
+                    (this.loading = !1);
                 },
                 error: (t) => {
-                  401 === t.status && (this.errorMSG = "Unauthorized"),
+                  (this.loading = !1),
+                    401 === t.status && (this.errorMSG = "Unauthorized"),
                     403 === t.status && (this.errorMSG = "Forbiden"),
                     409 === t.status && (this.errorMSG = "Date already taken"),
                     setTimeout(() => {
@@ -18907,8 +18921,10 @@
         }
       }
       function f3(n, e) {
-        1 & n && (h(0, "button", 35), _(1, " Edit "), f()),
-          2 & n && (D(), v("disabled", I(9).form.invalid));
+        if ((1 & n && (h(0, "button", 35), _(1, " Edit "), f()), 2 & n)) {
+          const t = D();
+          v("disabled", I(9).form.invalid || !0 === t.loading);
+        }
       }
       function h3(n, e) {
         if (1 & n) {
@@ -19212,7 +19228,7 @@
                 y(2),
                 de(t.errorMSG),
                 y(1),
-                v("disabled", r.form.invalid);
+                v("disabled", r.form.invalid || !0 === t.loading);
             }
           },
           dependencies: [$e, zn, on, Pr, jt, Gn, an, Tn, di, kr, Rt, yo, sn],
@@ -19224,7 +19240,8 @@
             (this.Refresh = new he()),
             (this.reservation = new Co()),
             (this.errorMSG = ""),
-            (this.roles = []);
+            (this.roles = []),
+            (this.loading = !1);
         }
         ngOnInit() {
           this.roles = this._loginService.haveAccess().UserInfo.roles;
@@ -19233,28 +19250,31 @@
           this.Refresh.emit();
         }
         onSubmit(e) {
-          this._reservationService
-            .editReservation(
-              this.reservation.number,
-              this.reservation.bookedDate,
-              this.reservation
-            )
-            .subscribe({
-              next: () => {
-                e.reset(),
-                  (this.reservation = new Co()),
-                  this.sendRefreshReq(),
-                  this.closeModal();
-              },
-              error: (t) => {
-                401 === t.status && (this.errorMSG = "Unauthorized"),
-                  403 === t.status && (this.errorMSG = "Forbiden"),
-                  409 === t.status && (this.errorMSG = "Date already taken"),
-                  setTimeout(() => {
-                    this.errorMSG = "";
-                  }, 2e3);
-              },
-            });
+          (this.loading = !0),
+            this._reservationService
+              .editReservation(
+                this.reservation.number,
+                this.reservation.bookedDate,
+                this.reservation
+              )
+              .subscribe({
+                next: () => {
+                  e.reset(),
+                    (this.reservation = new Co()),
+                    this.sendRefreshReq(),
+                    this.closeModal(),
+                    (this.loading = !1);
+                },
+                error: (t) => {
+                  (this.loading = !1),
+                    401 === t.status && (this.errorMSG = "Unauthorized"),
+                    403 === t.status && (this.errorMSG = "Forbiden"),
+                    409 === t.status && (this.errorMSG = "Date already taken"),
+                    setTimeout(() => {
+                      this.errorMSG = "";
+                    }, 2e3);
+                },
+              });
         }
         DeleteReservation() {
           1 == window.confirm("Confirm delete") &&
@@ -20569,7 +20589,8 @@
             (this.Refresh = new he()),
             (this.revenue = new Nu()),
             (this.errorMSG = ""),
-            (this.roles = []);
+            (this.roles = []),
+            (this.loading = !1);
         }
         ngOnInit() {
           this.roles = this._loginService.haveAccess().UserInfo.roles;
@@ -20578,21 +20599,26 @@
           this.Refresh.emit();
         }
         onSubmit(e) {
-          this._revenuesService
-            .editRevenue(this.revenue._id, this.revenue)
-            .subscribe({
-              next: () => {
-                this.sendRefreshReq(), e.reset(), this.closeModal();
-              },
-              error: (t) => {
-                401 === t.status && (this.errorMSG = "Unauthorized"),
-                  403 === t.status && (this.errorMSG = "Forbiden"),
-                  404 === t.status && (this.errorMSG = "Revenue Not Found"),
-                  setTimeout(() => {
-                    this.errorMSG = "";
-                  }, 2e3);
-              },
-            });
+          (this.loading = !0),
+            this._revenuesService
+              .editRevenue(this.revenue._id, this.revenue)
+              .subscribe({
+                next: () => {
+                  this.sendRefreshReq(),
+                    e.reset(),
+                    this.closeModal(),
+                    (this.loading = !1);
+                },
+                error: (t) => {
+                  (this.loading = !1),
+                    401 === t.status && (this.errorMSG = "Unauthorized"),
+                    403 === t.status && (this.errorMSG = "Forbiden"),
+                    404 === t.status && (this.errorMSG = "Revenue Not Found"),
+                    setTimeout(() => {
+                      this.errorMSG = "";
+                    }, 2e3);
+                },
+              });
         }
         closeModal() {
           let e = document.getElementById("edit-revenue-close"),
@@ -20998,7 +21024,7 @@
                 y(2),
                 de(t.errorMSG),
                 y(1),
-                v("disabled", r.form.invalid);
+                v("disabled", r.form.invalid || !0 === t.loading);
             }
           },
           dependencies: [$e, zn, on, Pr, jt, Gn, an, Tn, di, kr, Rt, yo, sn],
@@ -21513,7 +21539,8 @@
             (this.isAdminChecked = !1),
             (this.isEditorChecked = !1),
             (this.newPassword = ""),
-            (this.errorMSG = "");
+            (this.errorMSG = ""),
+            (this.loading = !1);
         }
         closeModal() {
           let e = document.getElementById("edit-modal-close"),
@@ -21539,19 +21566,21 @@
             this.isEditorChecked
               ? (this.user.roles.editor = 2001)
               : delete this.user.roles.editor,
+            (this.loading = !0),
             this._usersServive.editUser(this.user).subscribe({
               next: () => {
-                this.closeModal(), e.reset();
+                this.closeModal(), e.reset(), (this.loading = !1);
               },
               error: (t) => {
-                (this.errorMSG =
-                  401 === t.status
-                    ? "Unauthorized"
-                    : 403 === t.status
-                    ? "Forbiden"
-                    : 409 === t.status
-                    ? "username already exists"
-                    : "Unexpected Error Occured"),
+                (this.loading = !1),
+                  (this.errorMSG =
+                    401 === t.status
+                      ? "Unauthorized"
+                      : 403 === t.status
+                      ? "Forbiden"
+                      : 409 === t.status
+                      ? "username already exists"
+                      : "Unexpected Error Occured"),
                   setTimeout(() => {
                     (this.errorMSG = ""), this.closeModal(), e.reset();
                   }, 2e3);
@@ -21660,7 +21689,7 @@
             y(4),
             v("ngModel", o.isEditorChecked),
             y(3),
-            v("disabled", t.form.invalid);
+            v("disabled", t.form.invalid || !0 === o.loading);
         }
       }
       (da.ɵfac = function (e) {
@@ -21894,7 +21923,7 @@
                 y(4),
                 v("checked", t.user.roles.editor)("ngModel", t.isEditorChecked),
                 y(3),
-                v("disabled", r.form.invalid);
+                v("disabled", r.form.invalid || !0 === t.loading);
             }
           },
           dependencies: [$e, zn, on, Cu, jt, Gn, an, Tn, Rt, sn],
@@ -21906,7 +21935,8 @@
             (this.errorMSG = ""),
             (this.isAdminChecked = !1),
             (this.isEditorChecked = !1),
-            (this.isFormDirty = !1);
+            (this.isFormDirty = !1),
+            (this.loading = !1);
         }
         ngOnInit() {
           this._usersService.isDirty$.subscribe((e) => {
@@ -21920,6 +21950,7 @@
             this.isEditorChecked
               ? (this.user.roles.editor = 2001)
               : delete this.user.roles.editor,
+            (this.loading = !0),
             this._usersService.addNewUser(this.user).subscribe({
               next: () => {
                 e.reset(),
@@ -21927,17 +21958,19 @@
                     username: "",
                     password: "",
                     roles: { user: 1984 },
-                  });
+                  }),
+                  (this.loading = !1);
               },
               error: (t) => {
-                (this.errorMSG =
-                  401 === t.status
-                    ? "Unauthorized"
-                    : 403 === t.status
-                    ? "Forbiden"
-                    : 409 === t.status
-                    ? "username already exists"
-                    : "Unexpected Error Occured"),
+                (this.loading = !1),
+                  (this.errorMSG =
+                    401 === t.status
+                      ? "Unauthorized"
+                      : 403 === t.status
+                      ? "Forbiden"
+                      : 409 === t.status
+                      ? "username already exists"
+                      : "Unexpected Error Occured"),
                   setTimeout(() => {
                     this.errorMSG = "";
                   }, 2e3);
